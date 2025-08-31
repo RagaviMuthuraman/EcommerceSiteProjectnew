@@ -1,0 +1,14 @@
+.banner-container {
+  width: 100%;          /* full browser width */
+  height: 600px;        /* fixed small height */
+  overflow: hidden;     /* prevents anything from overflowing */
+  margin: 0 auto;
+  border-radius: 12px;  /* optional */
+}
+
+.banner-container img {
+  width: 100%;          /* stretch horizontally */
+  height: 400%;         /* fill the container height */
+  object-fit: fit;     /* stretches the image to fit exactly width & height */
+  display: block;
+}

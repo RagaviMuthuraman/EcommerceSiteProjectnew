@@ -1,0 +1,9 @@
+Fonts used in this design:
+
+Font: Caveat
+Author: Impallari Type
+Url: https://fonts.google.com/specimen/Caveat
+
+Font: NTR
+Author: Purushoth Kumar Guttula
+Url: https://fonts.google.com/specimen/NTR
