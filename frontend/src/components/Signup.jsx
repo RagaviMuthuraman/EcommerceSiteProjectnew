@@ -1,55 +1,39 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const Signup = () => {
+const Signup = ({ setUser }) => {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     try {
       const { data } = await axios.post("http://localhost:5000/api/auth/signup", form);
       localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      setUser(data.user);
       alert("✅ Signup successful!");
-      setForm({ name: "", email: "", password: "" });
+      navigate("/admin");
     } catch (err) {
-      alert(err.response?.data?.message || "Error signing up");
+      setError(err.response?.data?.message || "Signup failed");
     }
   };
 
   return (
     <div style={{ maxWidth: "400px", margin: "auto" }}>
-      <h2>Signup</h2>
+      <h2>Sign Up</h2>
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={form.name}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          required
-        />
-        <button type="submit">Signup</button>
+        <input placeholder="Name" name="name" value={form.name} onChange={handleChange} required/>
+        <input placeholder="Email" type="email" name="email" value={form.email} onChange={handleChange} required/>
+        <input placeholder="Password" type="password" name="password" value={form.password} onChange={handleChange} required/>
+        <button type="submit">Sign Up</button>
       </form>
+      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
 };

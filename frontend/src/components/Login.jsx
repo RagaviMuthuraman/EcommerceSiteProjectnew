@@ -1,59 +1,36 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Link } from "react-router-dom"; // react-router-dom must be installed
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
+  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     try {
       const { data } = await axios.post("http://localhost:5000/api/auth/login", form);
+
+      if (!data.user.isAdmin) return alert("❌ Only admin can login here");
+
       localStorage.setItem("token", data.token);
-      alert("✅ Login successful!");
-      setForm({ email: "", password: "" });
+      alert("✅ Login successful");
+      navigate("/admin"); // go to admin page
     } catch (err) {
-      alert(err.response?.data?.message || "Error logging in");
+      alert(err.response?.data?.message || "Login failed");
     }
   };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "auto" }}>
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          required
-        />
-        <button type="submit">Login</button>
-      </form>
-
-      <p style={{ marginTop: "10px" }}>
-        Don't have an account?{" "}
-        <Link to="/signup" style={{ color: "blue", textDecoration: "underline" }}>
-          Sign Up
-        </Link>
-      </p>
-    </div>
+    <form onSubmit={handleSubmit}>
+      <h2>Admin Login</h2>
+      <input name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
+      <input type="password" name="password" placeholder="Password" value={form.password} onChange={handleChange} required />
+      <button type="submit">Login</button>
+    </form>
   );
 };
 
 export default Login;
-
-

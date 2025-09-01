@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { signInWithPopup } from "firebase/auth";
-import { auth, provider } from "../firebase"; // make sure this path is correct
 
 const categories = ["All", "Books", "Fashion", "Electronics"];
 
@@ -10,17 +8,21 @@ const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [category, setCategory] = useState("All");
   const [cartCount, setCartCount] = useState(0);
-  const [user, setUser] = useState(null); // store Google user info
+  const [adminLoggedIn, setAdminLoggedIn] = useState(false); // check admin login
 
   const navigate = useNavigate();
-  const userId = "user123"; // replace with real user ID
 
+  // Check token in localStorage to detect admin login
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) setAdminLoggedIn(true);
+
     fetchCartCount();
   }, []);
 
   const fetchCartCount = async () => {
     try {
+      const userId = "user123"; // replace with real user ID
       const { data } = await axios.get(`http://localhost:5000/api/cart/${userId}`);
       setCartCount(data.products.length);
     } catch (err) {
@@ -33,16 +35,10 @@ const Navbar = () => {
     navigate(`/products?search=${encodeURIComponent(searchTerm)}&category=${category}`);
   };
 
-  const handleGoogleLogin = async () => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-      setUser(result.user);
-      alert(`Welcome ${result.user.displayName}`);
-      // Optional: save user info in localStorage or context
-    } catch (error) {
-      console.error(error.message);
-      alert("Google login failed!");
-    }
+  const handleAdminLogout = () => {
+    localStorage.removeItem("token"); // remove token
+    setAdminLoggedIn(false);
+    navigate("/login"); // redirect to login page
   };
 
   return (
@@ -62,26 +58,6 @@ const Navbar = () => {
         <Link to="/" style={{ color: "#fff", textDecoration: "none" }}>
           Home
         </Link>
-
-        {/* Google Login Button */}
-        {!user ? (
-          <button
-            onClick={handleGoogleLogin}
-            style={{
-              background: "#fff",
-              color: "#1f2937",
-              padding: "6px 12px",
-              borderRadius: "4px",
-              border: "none",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-          >
-            Login with Google
-          </button>
-        ) : (
-          <span style={{ color: "#fff" }}>Hi, {user.displayName}</span>
-        )}
       </div>
 
       {/* Center Search Bar */}
@@ -154,10 +130,41 @@ const Navbar = () => {
             </span>
           )}
         </Link>
-        <Link to="/admin" style={{ color: "#fff", textDecoration: "none" }}>
-          Admin
-        </Link>
-         <Link to="/products" style={{ color: "#fff", textDecoration: "none" }}>Products</Link>
+
+        {adminLoggedIn ? (
+          <>
+            <Link to="/admin" style={{ color: "#fff", textDecoration: "none" }}>
+              Admin
+            </Link>
+            <button
+              onClick={handleAdminLogout}
+              style={{
+                background: "red",
+                color: "#fff",
+                padding: "6px 12px",
+                borderRadius: "4px",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <Link
+            to="/login"
+            style={{
+              background: "#fff",
+              color: "#1f2937",
+              padding: "6px 12px",
+              borderRadius: "4px",
+              textDecoration: "none",
+              fontWeight: "bold",
+            }}
+          >
+            Login
+          </Link>
+        )}
       </div>
     </nav>
   );
